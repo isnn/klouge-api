@@ -1,17 +1,8 @@
 import { prisma } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
+import { generateKey, hashKey } from "../helper/utils.js";
 import { createDeviceValidation, getDetailDeviceValidation, getDetailKeyValidation, updateDeviceValidation } from "../validations/device-validation.js";
 import { validate } from "../validations/validation.js";
-
-import crypto from 'crypto';
-
-function generateKey() {
-    return crypto.randomBytes(32).toString('hex');
-}
-
-function hashKey(key) {
-    return crypto.createHash('sha256').update(key).digest('base64')
-}
 
 const create = async (user, request) =>{
     const createRequest = validate(createDeviceValidation, request);
@@ -156,7 +147,7 @@ const apiKeyPost = async (userId, deviceId) => {
         throw new ResponseError(404, "Device not found or Access Denied");
     }
 
-        const deviceApiKey = generateKey();
+    const deviceApiKey = generateKey();
     const hashedApiKey = hashKey(deviceApiKey);
     
     const data = {
