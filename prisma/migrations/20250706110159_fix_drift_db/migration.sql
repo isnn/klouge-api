@@ -1,0 +1,1 @@
+CREATE INDEX "device_metrics_timestamp_idx" ON "device_metrics" ("timestamp" DESC);
