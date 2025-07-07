@@ -17,7 +17,7 @@ const deviceMiddleware = async (req, res, next) => {
     try {
         const hashed = hashKey(token);
 
-        const device = await prisma.apiKey.findFirst({
+        const deviceApi = await prisma.apiKey.findFirst({
             where: {
                 key: hashed
             },
@@ -28,17 +28,19 @@ const deviceMiddleware = async (req, res, next) => {
             device: {
                 select: {
                     id: true,
-                    name: true,                }
+                    id_user: true,                
+                    name: true,                
+                }
                 }
             }
         })
         
-        if (!device) {
+        if (!deviceApi) {
             throw new ResponseError(401, "Unauthorized: Invalid Token");
         } 
         else {
             
-            req.device = device;
+            req.device = deviceApi.device;
             next();
         }
 }
