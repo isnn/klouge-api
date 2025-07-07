@@ -57,7 +57,7 @@ model ApiKey {
 
 model DeviceMetric {
   id         Int      @default(autoincrement())
-  timestamp  DateTime
+  timestamp  DateTime @db.Timestamptz(3)
   id_device  Int
   metrics    Json
   created_at DateTime @default(now())
