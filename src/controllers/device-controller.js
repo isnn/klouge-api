@@ -105,7 +105,11 @@ const apiKeyRemove = async (req, res, next) => {
 const createMetrics = async (req, res, next) => {
     try {
         const device = req.device;
-        console.log("Add  Here Metrics: ", device);
+        const request = req.body;
+        const result = await deviceServices.createMetrics(device.id, request);
+        res.status(201).json({
+            data: result
+        });
     }
     catch (error) {
         next(error);
