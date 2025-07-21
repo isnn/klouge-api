@@ -3,30 +3,27 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from 'uuid';
 import { validate } from "../validations/validation.js";
 import { ResponseError } from "../error/response-error.js";
-import { getDetailValidation, loginValidation, logoutValidation, updateValidation } from "../validations/user-validation.js";
+import { getDetailValidation, loginValidation, logoutValidation, registerValidation, updateValidation } from "../validations/user-validation.js";
 import jwt from "jsonwebtoken";
 
 const register = async (request) => {
-    const username = request.body.username;
-    const name = request.body.name;
-    const role = request.body.role || 2;
+    const registerRequest = validate(registerValidation, request);
+    const role = registerRequest.role || 2;
 
-    
     const countUser = await prisma.user.count({
         where: {
-            username: username
+            username: registerRequest.username
         }
     });
 
     if (countUser > 0) {
         throw new ResponseError(401, "Username already exists");
     }
-    
-    const password = await bcrypt.hash(request.body.password, 10); 
-    
+
+    const password = await bcrypt.hash(registerRequest.password, 10);
+
     const user = {
-        username: username,
-        name: name,
+        username: registerRequest.username,
         role: {
             connect: {
                 id: parseInt(role)

@@ -2,7 +2,7 @@ import userServices from "../services/user-services.js";
 
 const register = async (req, res, next) => {
     try {
-        const result = await userServices.register(req);
+        const result = await userServices.register(req.body);
         res.status(201).json({
             data: result
         });
