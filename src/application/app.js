@@ -21,4 +21,4 @@ app.use(base_path_v1, userRouter);
 app.use(base_path_v1, deviceRouter);
 app.use(errorMiddleware);
 
-console.table(expressListEndpoints(publicRouter));
+// console.table(expressListEndpoints(publicRouter));
