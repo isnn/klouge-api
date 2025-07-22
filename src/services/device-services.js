@@ -1,17 +1,8 @@
 import { prisma } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
-import { createDeviceValidation, getDetailDeviceValidation, getDetailKeyValidation, updateDeviceValidation } from "../validations/device-validation.js";
+import { generateKey, hashKey } from "../helper/utils.js";
+import { createDeviceValidation, getDetailDeviceValidation, getDetailKeyValidation, getMetricsValidation, updateDeviceValidation } from "../validations/device-validation.js";
 import { validate } from "../validations/validation.js";
-
-import crypto from 'crypto';
-
-function generateKey() {
-    return crypto.randomBytes(32).toString('hex');
-}
-
-function hashKey(key) {
-    return crypto.createHash('sha256').update(key).digest('base64')
-}
 
 const create = async (user, request) =>{
     const createRequest = validate(createDeviceValidation, request);
@@ -156,7 +147,7 @@ const apiKeyPost = async (userId, deviceId) => {
         throw new ResponseError(404, "Device not found or Access Denied");
     }
 
-        const deviceApiKey = generateKey();
+    const deviceApiKey = generateKey();
     const hashedApiKey = hashKey(deviceApiKey);
     
     const data = {
@@ -237,6 +228,25 @@ const apiKeyRemove = async (userId, deviceId, keyId) => {
     return result;
 }
 
+const createMetrics = async (deviceId, request) => {
+    request = validate(getMetricsValidation, request, { abortEarly: false });
+    const data = request.map((item) => ({
+        id_device: parseInt(deviceId),
+        timestamp: new Date(item.timestamp),
+        metrics: {
+            cpu_usage: item.metrics.cpu_usage,
+            memory_usage: item.metrics.memory_usage,
+            disk_space: item.metrics.disk_space
+        }
+    }))
+    const result = await prisma.deviceMetric.createMany({
+        data: data,
+        skipDuplicates: true
+    });
+
+    return result
+}
+
 export default {
     create,
     get,
@@ -245,5 +255,6 @@ export default {
     remove,
     apiKeyPost,
     apiKeyShow,
-    apiKeyRemove
+    apiKeyRemove,
+    createMetrics
 };

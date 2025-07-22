@@ -102,6 +102,20 @@ const apiKeyRemove = async (req, res, next) => {
     }
 }
 
+const createMetrics = async (req, res, next) => {
+    try {
+        const device = req.device;
+        const request = req.body;
+        const result = await deviceServices.createMetrics(device.id, request);
+        res.status(201).json({
+            data: result
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
 export default {
     create,
     get,
@@ -110,5 +124,6 @@ export default {
     remove,
     apiKeyPost,
     apiKeyShow,
-    apiKeyRemove
+    apiKeyRemove,
+    createMetrics
 }

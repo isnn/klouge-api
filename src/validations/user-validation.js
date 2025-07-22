@@ -3,8 +3,13 @@ import Joi from "joi";
 export const userValidation = Joi.object({
     username: Joi.string().min(3).required(),
     password: Joi.string().required(),
-    name: Joi.string().required(),
     role: Joi.number().valid(1, 2)
+});
+
+export const registerValidation = Joi.object({
+    username: Joi.string().min(3).required(),
+    password: Joi.string().required(),
+    role: Joi.number().optional()
 });
 
 export const loginValidation = Joi.object({

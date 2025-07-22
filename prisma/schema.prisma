@@ -3,56 +3,68 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-}   
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 model User {
-    id Int @id @default(autoincrement())
-    username String @unique @db.VarChar(100)
-    password String @db.VarChar(100)
-    name String @db.VarChar(100)
-    token String? @db.VarChar(100)
-    id_role Int
+  id       Int      @id @default(autoincrement())
+  username String   @unique @db.VarChar(100)
+  password String   @db.VarChar(100)
+  name     String?   @db.VarChar(100)
+  token    String?  @db.VarChar(100)
+  id_role  Int
+  apiKey   ApiKey[]
+  device   Device[]
+  role     Role     @relation(fields: [id_role], references: [id])
 
-    role Role @relation(fields: [id_role], references: [id]) 
-    device Device[]
-    apiKey ApiKey[]
-
-    @@map("users")
+  @@map("users")
 }
 
 model Role {
-    id Int @id @default(autoincrement())
-    name String @unique @db.VarChar(100)
-    users User[] 
-    
-    @@map("roles")
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(100)
+  users User[]
+
+  @@map("roles")
 }
 
 model Device {
-    id Int @id @default(autoincrement())
-    id_user Int
-    name String @db.VarChar(100)
-    create_at DateTime @default(now())
-    update_at DateTime @updatedAt
-    
-    user User @relation(fields: [id_user], references: [id])
-    apiKey ApiKey?
+  id            Int            @id @default(autoincrement())
+  id_user       Int
+  name          String         @db.VarChar(100)
+  create_at     DateTime       @default(now())
+  update_at     DateTime       @updatedAt
+  apiKey        ApiKey?
+  deviceMetrics DeviceMetric[]
+  user          User           @relation(fields: [id_user], references: [id])
 
-    @@map("devices")
+  @@map("devices")
 }
 
 model ApiKey {
-    id Int @id @default(autoincrement())
-    id_user Int
-    id_device Int @unique
-    key String @unique @db.VarChar(100)
-    created_at DateTime @default(now())
-    updated_at DateTime @updatedAt
-    
-    user User @relation(fields: [id_user], references: [id])
-    device Device @relation(fields: [id_device], references: [id])
-    
-    @@map("api_keys")
+  id         Int      @id @default(autoincrement())
+  id_user    Int
+  id_device  Int      @unique
+  key        String   @unique @db.VarChar(100)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  device     Device   @relation(fields: [id_device], references: [id])
+  user       User     @relation(fields: [id_user], references: [id])
+
+  @@map("api_keys")
+}
+
+model DeviceMetric {
+  id         Int      @default(autoincrement())
+  timestamp  DateTime @db.Timestamptz(3)
+  id_device  Int
+  metrics    Json
+  created_at DateTime @default(now())
+  device     Device   @relation(fields: [id_device], references: [id])
+
+  @@id([id, timestamp])
+  @@index([metrics(ops: JsonbPathOps)], type: Gin)
+  @@index([timestamp(sort: Desc)])
+  @@map("device_metrics")
 }
